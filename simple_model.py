@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from keras.models import Sequential, Model
 from keras.layers import Dense, Activation, Embedding, Flatten, Dropout, Conv1D, MaxPooling1D, Input, GlobalMaxPooling1D
 from keras.utils.np_utils import to_categorical
@@ -7,17 +8,23 @@ from sklearn.model_selection import train_test_split
 from keras.preprocessing.text import Tokenizer, text_to_word_sequence
 from keras.preprocessing import sequence
 
-f = open("rt-polaritydata/rt-polarity.neg", "rb")
+# f = open("rt-polaritydata/rt-polarity.neg", "rb")
+f = open("subjectivity-data/plot.tok.gt9.5000", "rb")
 phrases = f.read().splitlines()
-f = open("rt-polaritydata/rt-polarity.pos", "rb")
+len_class0 = len(phrases)
+# f = open("rt-polaritydata/rt-polarity.pos", "rb")
+f = open("subjectivity-data/quote.tok.gt9.5000", "rb")
 phrases.extend(f.read().splitlines())
+len_class1 = len(phrases) - len_class0
 print(phrases[:5])
 
-labels = [0 for _ in range(5331)] + [1 for _ in range(5331)]
+labels = [0 for _ in range(len_class0)] + [1 for _ in range(len_class1)]
 x_train, x_test, y_train, y_test = train_test_split(phrases, labels, test_size=0.33)
 x_train = [str(sent) for sent in x_train]
 x_test = [str(sent) for sent in x_test]
 print(x_train[:5])
+
+# sys.exit()
 
 tokenizer = Tokenizer(num_words=None,
                                    filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',

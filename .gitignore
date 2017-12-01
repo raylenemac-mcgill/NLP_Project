@@ -105,3 +105,6 @@ glove.6B.100d.txt
 .neg
 .pos
 rt-polaritydata
+skip-thoughts
+subjectivity-data
+vectors.pickle

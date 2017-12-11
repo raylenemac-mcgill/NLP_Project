@@ -1,0 +1,39 @@
+sentence length 51
+did cross validation for each result
+----------- EPOCH RESULTS -----------------------
+
+With epoch 2: (average accuracy: 0.674189 std:0.02246928)
+With epoch 3: (average accuracy: 0.686056 std: 0.018946297)
+With epoch 4: (average accuracy: 0.6811163 std: 0.02348778)
+
+
+--------- DROPOUT RESULTS ------------------------
+
+With dropout rate 0.0 :((average accuracy:0.67885607126113456
+With dropout rate 0.1 :(average accuracy:0.68213783403656825
+With dropout rate 0.2: (average accuracy:0.68682606657290202
+With dropout rate 0.3: (average accuracy:0.69151429910923579 
+With dropout rate 0.4 :(average accuracy:0.67698077824660108 
+
+-------- 1 HIDDEN LAYER RESULTS ------------------
+
+No negnificant difference for layer of size ( 32, 128, 1000, 2000) 
+avg acc around 68 % 
+
+-------- MULTI HIDDEN LAYER RESULTS ----------------
+
+average accuracy: 0.676982519248 std: 0.0163263138197, for layers with H1:128,H2:32 neurons
+average accuracy: 0.672758952909 std: 0.0117412799944, for layers with H1:128,H2:128 neurons
+average accuracy: 0.666772353728 std: 0.0166847011282, for layers with H1:128,H2:500 neurons
+average accuracy: 0.66619938247 std: 0.0101608045568, for layers with H1:128,H2:1000 neurons
+average accuracy: 0.675924944556 std: 0.00906876100729, for layers with H1:500,H2:32 neurons
+average accuracy: 0.665603319761 std: 0.0126373175217, for layers with H1:500,H2:128 neurons
+average accuracy: 0.667134364315 std: 0.00686277121581, for layers with H1:500,H2:500 neurons
+average accuracy: 0.66432241218 std: 0.0115661630734, for layers with H1:500,H2:1000 neurons
+average accuracy: 0.678152241504 std: 0.0124770949417, for layers with H1:1000,H2:32 neurons
+average accuracy: 0.659038796904 std: 0.0109288053935, for layers with H1:1000,H2:128 neurons
+average accuracy: 0.67088528257 std: 0.0105342701321, for layers with H1:1000,H2:500 neurons
+
+
+
+

@@ -17,12 +17,6 @@ f = open("subjectivity-data/quote.tok.gt9.5000", "rb")
 phrases.extend(f.read().splitlines())
 len_class1 = len(phrases) - len_class0
 
-s = phrases[0]
-print(type(s))
-s.decode('UTF-8')
-print(s)
-sys.exit()
-
 print(phrases[:5])
 
 labels = [0 for _ in range(len_class0)] + [1 for _ in range(len_class1)]

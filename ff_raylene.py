@@ -2,6 +2,7 @@ from sklearn.model_selection import train_test_split
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
 import numpy as np
+import cPickle
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Embedding, Flatten, Dropout, Conv1D, MaxPooling1D
 import sys
@@ -15,8 +16,18 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 
 
-def load_sent_embed(subj):
-	pass
+def load_sent_embed(sent_file):
+	with open(sent_file, "rb") as input_file:
+		vecs = cPickle.load(input_file)
+
+	half_split = len(vecs)/2
+	labels = np.zeros(half_split + half_split)
+	labels[:half_split] = 1.0
+	labels[half_split:] = 0.0
+
+	print(len(vecs))
+	# sys.exit()
+	return vecs, labels
 
 
 def load_data(files):
@@ -151,12 +162,13 @@ def create_model(layer_1_neurons=128, layer_2_neurons=32, dropout=0.2, input_dim
 
 def create_cnn_model(dropout=0.2, input_dim=(40, 100)):
 	model = Sequential()
-	model.add(Conv1D(filters=48, kernel_size=4 ,strides=1, input_shape=input_dim, kernel_initializer= 'uniform', activation= 'relu')) 
+	model.add(Conv1D(filters=16, kernel_size=10 ,strides=3, input_shape=input_dim, kernel_initializer= 'uniform', activation= 'relu')) 
 	# model.add(Dropout(dropout))
-	model.add(Conv1D(filters=16, kernel_size=4 ,strides=1, kernel_initializer= 'uniform', activation= 'relu')) 
+	model.add(Conv1D(filters=4, kernel_size=10 ,strides=3, kernel_initializer= 'uniform', activation= 'relu')) 
 	# model.add(Dropout(dropout))
 	model.add(Flatten())
-	model.add(Dense(32, activation='relu'))
+	model.add(Dense(64, activation='relu'))
+	model.add(Dense(16, activation='relu'))
 	model.add(Dense(1, activation='sigmoid'))
 	model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 	print(model.summary())
@@ -164,36 +176,44 @@ def create_cnn_model(dropout=0.2, input_dim=(40, 100)):
 
 
 def main():
-	cnn = True  # True for cnn, false for feed-forward NN
-	sent = False  # True for sentence embeddings, false for word embeddings
-	subj = True  # True for subjectivity dataset, false for polarity dataset
-	if sent:
-		data = load_sent_embed(subj)
+	cnn = False  # True for cnn, false for feed-forward NN
+	sent_embed = True  # True for sentence embeddings, false for word embeddings
+	subjectivity = False  # True for subjectivity dataset, false for polarity dataset
+	seed = 7
+
+	print('Loading data...')
+	if sent_embed:
+		if subjectivity:
+			sent_file = "subjectivity_vectors_all.pickle"
+		else:
+			sent_file = "sentiment_vectors_all.pickle"
+		data, labels = load_sent_embed(sent_file)
 	else:
-		print('Loading data...')
-		if subj:
+		if subjectivity:
 			files = ["subjectivity-data/plot.tok.gt9.5000", "subjectivity-data/quote.tok.gt9.5000"]
 		else:
 			files = ["rt-polaritydata/rt-polarity.neg", "rt-polaritydata/rt-polarity.pos"]
 		phrases, labels = load_data(files)
 		print('Preprocessing data...')
 		data = data_to_embedding(phrases, cnn, sent_len=40)
-
-	# splitting into test (60%) validation(20%) and test (20%)
-	seed = 7
 	data = np.asarray(data, dtype=np.float32)
-	print(data.shape)
-	x_first_split, x_test, y_first_split, y_test = train_test_split(data, labels, test_size=0.3, random_state=seed)
 
-	# --------------- simple way to make a model, train and test it ------------------
 	if cnn:
 		model_fn = create_cnn_model
-		dim = (data.shape[1], data.shape[2])
+		if sent_embed:
+			data = data[..., None]  # reshape the 2-d matrix to 3-d for input to the cnn
+		dim = (data.shape[1], data.shape[2])  # the data is 3-dimensional for cnn input: (#samples x 40 x 100) 
 	else:
-		model_fn = create_model
+		model_fn = create_model  # regular feed-forward NN
 		dim = len(data[0])
+	print(data.shape)
+
+	# --------------- simple way to make a model, train and test it ------------------
 
 	print('Building the model...')
+	# splitting into test (60%) validation(20%) and test (20%)
+	x_first_split, x_test, y_first_split, y_test = train_test_split(data, labels, test_size=0.3, random_state=seed)
+
 	model = KerasClassifier(build_fn=model_fn, epochs=3, dropout=0.2, input_dim=dim, verbose=0)
 
 	# -------------- example cross validation -----------------------
@@ -203,7 +223,7 @@ def main():
 	# print("\naverage result:{0} , std: {1}".format(results.mean(),results.std()))
 
 	# -------------- finally, produce predictions on test set ------
-	model.fit(x_first_split, y_first_split)
+	model.fit(x_first_split, y_first_split, shuffle=False)
 	preds = model.predict(x_test)
 	acc = accuracy_score(y_test, preds)
 	print "accuracy: ", acc * 100

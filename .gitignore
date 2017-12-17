@@ -107,4 +107,4 @@ glove.6B.100d.txt
 rt-polaritydata
 skip-thoughts
 subjectivity-data
-vectors.pickle
+*.pickle
